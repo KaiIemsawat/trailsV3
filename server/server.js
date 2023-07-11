@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const imageDownloader = require("image-downloader");
 
 const UserModel = require("./models/userModel");
 
@@ -12,6 +13,7 @@ const jwtScret = "fadfafgdfgdfsghfdhdjhgjgk1122304";
 
 app.use(express.json());
 app.use(cookieParser());
+app.use("/uploads/", express.static(`${__dirname}/uploads/`)); // <-- used to handle uploaded photos
 app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 mongoose.connect(
     "mongodb+srv://kaiiemsawat:Kinkin3710@cluster0.48awedd.mongodb.net/trails?retryWrites=true&w=majority"
@@ -84,6 +86,16 @@ app.get("/profile", (req, res) => {
 
 app.post("/logout", (erq, res) => {
     res.cookie("token", "").json(true);
+});
+
+app.post("/uploadByLink", async (req, res) => {
+    const { link } = req.body;
+    const newFileName = `photo-${Date.now()}.jpg`;
+    await imageDownloader.image({
+        url: link,
+        dest: __dirname + "/uploads/" + newFileName,
+    });
+    res.json(newFileName);
 });
 
 app.listen(8000);
