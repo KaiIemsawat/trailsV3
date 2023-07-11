@@ -6,6 +6,7 @@ import { GrWheelchair } from "react-icons/gr";
 import { TbParking, TbTent } from "react-icons/tb";
 import { useState } from "react";
 import Amenities from "../Amenities";
+import axios from "axios";
 
 export default function MyTrails() {
     const { action } = useParams();
@@ -22,7 +23,7 @@ export default function MyTrails() {
     const [duration, setDuration] = useState(1);
 
     function inputHeader(text) {
-        return <h2 className="text-xl text-slate-500 mt-4">{text}</h2>;
+        return <h2 className="text-xl  mt-4">{text}</h2>;
     }
 
     function inputDescription(text) {
@@ -36,6 +37,36 @@ export default function MyTrails() {
                 {inputDescription(description)}
             </>
         );
+    }
+
+    async function addPhotoByLink(e) {
+        e.preventDefault();
+        const { data: filename } = await axios.post("/uploadByLink", {
+            link: photoLink,
+        });
+        if (photoLink !== "") {
+            setAddedPhoto((prev) => {
+                return [...prev, filename];
+            });
+        } else {
+            alert("You selected add photo without inputing link"); // Will need to work on inputting non image link
+        }
+        setPhotoLink("");
+    }
+
+    function uploadPhoto(e) {
+        const files = e.target.files;
+        // console.log({ files }); // <-- to check file
+        const data = FormData();
+        data.set("photos", files);
+        axios
+            .post("/upload", data, {
+                headers: { "Content-type": "multipart/form-data" },
+            })
+            .then((response) => {
+                const { data } = response;
+                console.log(data);
+            });
     }
 
     return (
@@ -75,14 +106,32 @@ export default function MyTrails() {
                                 onChange={(e) => setPhotoLink(e.target.value)}
                                 placeholder={"URL LINK : to trail image"}
                             />
-                            <button className="bg-slate-200 px-4 rounded-2xl">
+                            <button
+                                onClick={addPhotoByLink}
+                                className="bg-slate-200 px-4 rounded-2xl">
                                 add&nbsp;photo
                             </button>
                         </div>
-                        <div className="mt-2 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-                            <button className="flex justify-center border bg-transparent rounded-2xl p-8 text-slate-500 text-xl gap-1">
+
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                            {addedPhoto.length > 0 &&
+                                addedPhoto.map((link) => (
+                                    <div>
+                                        <img
+                                            className="rounded-2xl"
+                                            src={`http://localhost:8000/uploads/${link}`}
+                                            alt=""
+                                        />
+                                    </div>
+                                ))}
+                            <label className="cursor-pointer flex items-center justify-center border bg-transparent rounded-2xl p-2 text-slate-500 text-xl gap-1">
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    onChange={uploadPhoto}
+                                />
                                 <BiImageAdd className="w-8 h-8" /> Upload
-                            </button>
+                            </label>
                         </div>
                         {preInput(
                             "Description",
@@ -116,9 +165,9 @@ export default function MyTrails() {
                         )}
                         <div className="grid gap-2 sm:grid-cols-3">
                             <div>
-                                <h3 className="mt-2 -mb-1">
+                                <h3 className="mt-2 -mb-1 text-slate-500">
                                     Distance{" "}
-                                    <span className="text-slate-400">
+                                    <span className="text-slate-500">
                                         (miles)
                                     </span>
                                 </h3>
@@ -133,9 +182,9 @@ export default function MyTrails() {
                                 />
                             </div>
                             <div>
-                                <h3 className="mt-2 -mb-1">
+                                <h3 className="mt-2 -mb-1 text-slate-500">
                                     Difficulty Level{" "}
-                                    <span className="text-slate-400">
+                                    <span className="text-slate-500">
                                         (1-10)
                                     </span>
                                 </h3>
@@ -151,9 +200,9 @@ export default function MyTrails() {
                                 />
                             </div>
                             <div>
-                                <h3 className="mt-2 -mb-1">
+                                <h3 className="mt-2 -mb-1 text-slate-500">
                                     Duration{" "}
-                                    <span className="text-slate-400">
+                                    <span className="text-slate-500">
                                         (hours)
                                     </span>
                                 </h3>

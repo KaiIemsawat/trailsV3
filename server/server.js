@@ -90,12 +90,17 @@ app.post("/logout", (erq, res) => {
 
 app.post("/uploadByLink", async (req, res) => {
     const { link } = req.body;
-    const newFileName = `photo-${Date.now()}.jpg`;
-    await imageDownloader.image({
-        url: link,
-        dest: __dirname + "/uploads/" + newFileName,
-    });
-    res.json(newFileName);
+    // console.log(link);
+    if (link) {
+        const newFileName = `photo-${Date.now()}.jpg`;
+        await imageDownloader.image({
+            url: link,
+            dest: __dirname + "/uploads/" + newFileName,
+        });
+        res.json(newFileName);
+    } else {
+        res.json("No link provided");
+    }
 });
 
 app.listen(8000);
