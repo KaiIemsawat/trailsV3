@@ -57,15 +57,21 @@ export default function MyTrails() {
     function uploadPhoto(e) {
         const files = e.target.files;
         // console.log({ files }); // <-- to check file
-        const data = FormData();
-        data.set("photos", files);
+        const data = new FormData();
+
+        for (let i = 0; i < files.length; i++) {
+            data.append("photos", files[i]);
+        }
+
         axios
             .post("/upload", data, {
                 headers: { "Content-type": "multipart/form-data" },
             })
             .then((response) => {
-                const { data } = response;
-                console.log(data);
+                const { data: filenames } = response;
+                setAddedPhoto((prev) => {
+                    return [...prev, ...filenames];
+                });
             });
     }
 
@@ -112,21 +118,24 @@ export default function MyTrails() {
                                 add&nbsp;photo
                             </button>
                         </div>
-
                         <div className="mt-2 grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                             {addedPhoto.length > 0 &&
                                 addedPhoto.map((link) => (
-                                    <div>
+                                    <div className="h-32 flex">
                                         <img
-                                            className="rounded-2xl"
+                                            className="rounded-2xl w-full object-cover"
                                             src={`http://localhost:8000/uploads/${link}`}
                                             alt=""
                                         />
                                     </div>
                                 ))}
-                            <label className="cursor-pointer flex items-center justify-center border bg-transparent rounded-2xl p-2 text-slate-500 text-xl gap-1">
+
+                            {/* --UPLOAD-- */}
+
+                            <label className="h-32 cursor-pointer flex items-center justify-center border bg-transparent rounded-2xl p-2 text-slate-500 text-xl gap-1">
                                 <input
                                     type="file"
+                                    multiple
                                     className="hidden"
                                     onChange={uploadPhoto}
                                 />

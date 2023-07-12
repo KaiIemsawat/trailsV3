@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const imageDownloader = require("image-downloader");
+const multer = require("multer");
+const fs = require("fs");
 
 const UserModel = require("./models/userModel");
 
@@ -101,6 +103,25 @@ app.post("/uploadByLink", async (req, res) => {
     } else {
         res.json("No link provided");
     }
+});
+
+const photoMidWare = multer({ dest: "uploads/" });
+
+// "photos" need to match with data.set("photos", files); in uploadPhoto() in MyTrail.jsx
+// 100 is the limit (can be any other number)
+app.post("/upload", photoMidWare.array("photos", 100), (req, res) => {
+    const uploadedFiles = [];
+    // console.log(req.files);
+    for (let i = 0; i < req.files.length; i++) {
+        const { path, originalname } = req.files[i];
+        const parts = originalname.split(".");
+        const extension = parts[parts.length - 1];
+        const newPath = `${path}.${extension}`;
+        // console.log(path + " " + newPath);
+        fs.renameSync(path, newPath);
+        uploadedFiles.push(newPath.replace("uploads/", ""));
+    }
+    res.json(uploadedFiles);
 });
 
 app.listen(8000);
