@@ -41,9 +41,14 @@ export default function MyTrails() {
 
     async function addPhotoByLink(e) {
         e.preventDefault();
-        const { data: filename } = await axios.post("/uploadByLink", {
-            link: photoLink,
-        });
+        const { data: filename } = await axios
+            .post("/uploadByLink", {
+                link: photoLink,
+            })
+            .catch((err) => {
+                console.log(err);
+                alert("Invalid link");
+            });
         if (photoLink !== "") {
             setAddedPhoto((prev) => {
                 return [...prev, filename];

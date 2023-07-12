@@ -93,15 +93,19 @@ app.post("/logout", (erq, res) => {
 app.post("/uploadByLink", async (req, res) => {
     const { link } = req.body;
     // console.log(link);
-    if (link) {
-        const newFileName = `photo-${Date.now()}.jpg`;
-        await imageDownloader.image({
-            url: link,
-            dest: __dirname + "/uploads/" + newFileName,
-        });
-        res.json(newFileName);
-    } else {
-        res.json("No link provided");
+    try {
+        if (link) {
+            const newFileName = `photo-link-${Date.now()}.jpg`;
+            await imageDownloader.image({
+                url: link,
+                dest: __dirname + "/uploads/" + newFileName,
+            });
+            res.json(newFileName);
+        } else {
+            res.json("No link provided");
+        }
+    } catch (error) {
+        res.status(400).json(error);
     }
 });
 
